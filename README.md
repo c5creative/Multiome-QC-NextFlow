@@ -1,12 +1,15 @@
 # 10X Multiome QC pipeline
 
-This pipeline subsets to quality barcodes (based on user-defined QC metric thresholds; outputs accompanying QC plot), runs demultiplexing with demuxlet (if VCF file provided), and runs ATAC-based doublet detection using AMULET.
+This pipeline subsets to quality barcodes (based on user-defined QC metric thresholds; outputs accompanying QC plot), runs demultiplexing with [demuxlet](https://github.com/statgen/popscle) (if VCF file provided), and runs ATAC-based doublet detection using [AMULET](https://github.com/UcarLab/AMULET). In addition, if starting from cellranger output or something other than our lab [snATAC-seq](https://github.com/porchard/snATACseq-NextFlow) / [snRNA-seq](https://github.com/porchard/snRNAseq-NextFlow) pipelines, this pipeline will also generate single nucleus-level RNA and ATAC QC metrics (using a custom python script and the [ataqv software](https://github.com/ParkerLab/ataqv), respectively) as well as bulk-level ATAC QC (an interactive ataqv report and, if requested, plots of bigwig signal near selected gene TSS) and bulk ATAC bigwig files, and will run [dropkick](https://github.com/KenLauLab/dropkick) on the RNA component.
 
 Note each library must be from a single species (i.e., no barnyard experiments).
 
+## Dependencies
+[Singularity (v. 3)](https://docs.sylabs.io/guides/3.0/user-guide/) and [NextFlow](https://www.nextflow.io/) (>= v. 20.10.0). Containers with the software for each step are pulled from the Sylabs cloud library (https://cloud.sylabs.io/library) or Docker hub (https://hub.docker.com/).
+
 ## Preprocessing
 
-If you are using the accompanying ATAC and RNA pipelines for upstream processing, you can skip this step. If you are instead starting from cellranger output or the output of some other pipeline, you'll need to run the preprocess.nf pipeline prior to running the main (qc.nf) pipeline.
+If you are using the accompanying [snATAC-seq](https://github.com/porchard/snATACseq-NextFlow) and [snRNA-seq](https://github.com/porchard/snRNAseq-NextFlow) pipelines for upstream processing, you can skip this step. If you are instead starting from cellranger output or the output of some other pipeline, you'll need to run the preprocess.nf pipeline prior to running the main (qc.nf) pipeline.
 
 The preprocessing pipeline takes the following input:
 * RNA BAM file
