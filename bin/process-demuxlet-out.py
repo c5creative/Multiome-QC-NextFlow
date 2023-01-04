@@ -6,9 +6,8 @@ import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import seaborn as sns
-from plutils import figures
-from snutils import nucleus
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -33,6 +32,70 @@ def recode_best(x):
     category = tmp[0]
     samples = '-'.join(tmp[1:])
     return f'{category} ({samples})' if category == 'SNG' else category
+
+
+@ticker.FuncFormatter
+def read_count_formatter(x, pos):
+    """
+    Tick label formatting function that converts labels to B/M/k (billions, millions, thousands).
+
+    Usage:
+    ax.xaxis.set_major_formatter(read_count_formatter)
+    """
+    if abs(x) >= 1e9:
+        return '{}B'.format(x/1e9)
+    elif abs(x) >= 1e6:
+        return '{}M'.format(x/1e6)
+    elif abs(x) >= 1e3:
+        return '{}k'.format(x/1e3)
+    else:
+        return x
+
+
+def make_colormap_dict(keys, palette='viridis'):
+    """
+    Given list of items (in order), create a dict of item --> color.
+
+    Input:
+    keys: list of items.
+    palette: name of matplotlib color palette to use
+
+    Returns: Dict of item --> color (hex)
+    """
+    assert(isinstance(keys, list))
+    assert(isinstance(palette, str))
+    cmap = mpl.cm.get_cmap(palette, len(keys))
+    return {keys[i]: cmap(i) for i in range(cmap.N)}
+
+
+def fix_heatmap_limits(ax):
+    """
+    Used to fix e.g. this bug: https://github.com/matplotlib/matplotlib/issues/14675
+    """
+    bottom, top = ax.get_ylim()
+    if bottom > top:
+        bottom += 0.5
+        top -= 0.5
+    else:
+        bottom -= 0.5
+        top += 0.5
+    ax.set_ylim(bottom, top)
+    return True
+
+
+def append_n(x):
+    """
+    e.g., pd.Series(['a', 'b', 'a']) --> pd.Series(['a (n=2)', 'b (n=1)', 'a (n=2)'])
+    """
+    if not isinstance(x, (pd.Series, np.ndarray, list)):
+        raise ValueError('x must be an array/list/Series')
+    tmp = list(x)
+    vc = pd.Series(tmp).value_counts().to_dict()
+    tmp = ['{} (n={:,})'.format(i, vc[i]) for i in tmp]
+    if isinstance(x, pd.Series):
+        tmp = pd.Series(tmp)
+        tmp.index = x.index
+    return tmp
 
 
 # read in barcodes
@@ -62,12 +125,12 @@ demuxlet['final_assignment'] = demuxlet[args.strategy].str.split(' ').map(lambda
 demuxlet[['RNA_BARCODE', 'final_assignment']].to_csv(f'{PREFIX}assignments.txt', sep='\t', index=False, header=False)
 
 
-cmap = figures.make_colormap_dict(list(sorted(set(demuxlet.ATAC.to_list() + demuxlet.RNA.to_list()))))
+cmap = make_colormap_dict(list(sorted(set(demuxlet.ATAC.to_list() + demuxlet.RNA.to_list()))))
 
 summarize = demuxlet.groupby(['ATAC', 'RNA']).size().rename('n').reset_index().pivot(index='ATAC', columns='RNA', values='n').fillna(0).astype(int)
 fig, ax = plt.subplots(figsize=(1+len(summarize.index), 1+len(summarize.columns)))
 sns.heatmap(summarize, annot=True, ax=ax)
-figures.fix_heatmap_limits(ax)
+fix_heatmap_limits(ax)
 fig.savefig(f'{PREFIX}demuxlet-heatmap.png', bbox_inches='tight', dpi=300)
 fig.clf()
 
@@ -106,12 +169,12 @@ fig.clf()
 
 fig, ax = plt.subplots(figsize=(10, 8))
 df = demuxlet.copy()
-df.label = figures.append_n(df.label)
+df.label = append_n(df.label)
 sns.scatterplot(x='RNA_SNPs', y='ATAC_SNPs', hue='label', ax=ax, data=df, alpha=0.1)
 ax.set_xscale('log')
 ax.set_yscale('log')
-ax.xaxis.set_major_formatter(figures.read_count_formatter)
-ax.yaxis.set_major_formatter(figures.read_count_formatter)
+ax.xaxis.set_major_formatter(read_count_formatter)
+ax.yaxis.set_major_formatter(read_count_formatter)
 ax.set_ylabel('ATAC SNPs checked')
 ax.set_xlabel('RNA SNPs checked')
 
