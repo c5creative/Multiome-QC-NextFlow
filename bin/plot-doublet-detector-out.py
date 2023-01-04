@@ -27,8 +27,10 @@ barcode_to_assignment = dict(zip(dp.barcode, dp.is_doublet))
 
 singlets_atac = dp[~dp.is_doublet].barcode.to_list()
 singlets_rna = [atac_to_rna_barcode[i] for i in singlets_atac]
-with open(f'{LIBRARY}.singlets.txt', 'w') as fh:
-    fh.write('\n'.join(singlets_atac + singlets_rna) + '\n')
+with open(f'{LIBRARY}.atac.singlets.txt', 'w') as fh:
+    fh.write('\n'.join(singlets_atac) + '\n')
+with open(f'{LIBRARY}.rna.singlets.txt', 'w') as fh:
+    fh.write('\n'.join(singlets_rna) + '\n')
 
 # plot the q-value distribution and note the number of singlets/doublets and doublet fraction
 fig, ax = plt.subplots()
