@@ -378,7 +378,7 @@ process ataqv_single_nucleus {
     path("${library}-${genome}.chunk_${chunk}.ataqv.out")
 
     """
-    ataqv --name ${library}-${genome} ${blacklists.collect({'--excluded-region-file ' + it}).join(' ')} --ignore-read-groups --nucleus-barcode-tag CB --metrics-file ${library}-${genome}.chunk_${chunk}.ataqv.json.gz --tss-file $tss ${get_organism(genome)} $md_bam > ${library}-${genome}.chunk_${chunk}.ataqv.out
+    export TERM=xterm-256color && ataqv --name ${library}-${genome} ${blacklists.collect({'--excluded-region-file ' + it}).join(' ')} --ignore-read-groups --nucleus-barcode-tag CB --metrics-file ${library}-${genome}.chunk_${chunk}.ataqv.json.gz --tss-file $tss ${get_organism(genome)} $md_bam > ${library}-${genome}.chunk_${chunk}.ataqv.out
     """
 
 }
@@ -466,7 +466,7 @@ process ataqv_bulk {
     path("${library}-${genome}.ataqv.out")
 
     """
-    ${IONICE} ataqv --name ${library}-${genome} --peak-file $peaks --ignore-read-groups --metrics-file ${library}-${genome}.ataqv.json.gz --tss-file $tss ${blacklists.collect({'--excluded-region-file ' + it}).join(' ')} ${get_organism(genome)} $md_bam > ${library}-${genome}.ataqv.out
+    export TERM=xterm-256color && ataqv --name ${library}-${genome} --peak-file $peaks --ignore-read-groups --metrics-file ${library}-${genome}.ataqv.json.gz --tss-file $tss ${blacklists.collect({'--excluded-region-file ' + it}).join(' ')} ${get_organism(genome)} $md_bam > ${library}-${genome}.ataqv.out
     """
 
 }
@@ -489,7 +489,7 @@ process ataqv_bulk_viewer {
     path("ataqv-viewer-${genome}")
 
     """
-    mkarv ataqv-viewer-${genome} ${json.join(' ')}
+    export TERM=xterm-256color && mkarv ataqv-viewer-${genome} ${json.join(' ')}
     """
 
 }
