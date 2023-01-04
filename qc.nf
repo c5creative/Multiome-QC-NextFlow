@@ -3,6 +3,19 @@
 nextflow.enable.dsl=2
 
 
+def get_genome (library) {
+    return params.libraries[library].genome
+}
+
+
+def get_blacklists (genome) {
+    if (params.blacklist[genome] instanceof String) {
+        return [params.blacklist[genome]]
+    } else {
+        return params.blacklist[genome]
+    }
+}
+
 process barcodes_passing_qc_thresholds {
 
     publishDir "${params.results}/barcodes-passing-qc-thresholds"
@@ -180,11 +193,8 @@ process prep_doublet_detection {
     output:
     tuple val(library), path('singlecell.csv'), path('autosomes.txt')
 
-    script:
-    genome = params.libraries[library].genome
-
     """
-    make-doubletdetector-files.py $pass_qc_barcodes $atac_barcode_list $genome
+    make-doubletdetector-files.py $pass_qc_barcodes $atac_barcode_list ${get_genome(library)}
     """
 
 }
@@ -197,17 +207,14 @@ process run_atac_doublet_detection {
     container 'library://porchard/default/amulet:1.1'
 
     input:
-    tuple val(library), path(bam), path(bam_index), path(single_cell), path(autosomes)
+    tuple val(library), path(bam), path(bam_index), path(single_cell), path(autosomes), path(blacklists)
 
     output:
     tuple val(library), path("${library}.doublet_probabilities.txt")
 
-    script:
-    genome = params.libraries[library].genome
-
     """
     mkdir -p output
-    zcat ${params.blacklist[genome].join(' ')} | sort -k1,1 -k2n,2 > blacklist.bed
+    zcat ${blacklists.join(' ')} | sort -k1,1 -k2n,2 > blacklist.bed
     /opt/AMULET/AMULET.sh --bcidx 0 --cellidx 1 --iscellidx 2 $bam $single_cell $autosomes blacklist.bed output/ /opt/AMULET/
     cp output/MultipletProbabilities.txt ${library}.doublet_probabilities.txt
     """
@@ -252,7 +259,7 @@ workflow {
     demuxlet_out_atac = demuxlet_out.filter({it -> it[1] == 'ATAC'}).map({it -> [it[0], it[2]]}) // library, best
     demuxlet_out_rna = demuxlet_out.filter({it -> it[1] == 'RNA'}).map({it -> [it[0], it[2]]}) // library, best
 
-    dd = atac_bam.combine(prep_doublet_detection(pass_qc_metrics.atac_nuclei.combine(Channel.fromPath(params.atac_barcodes))), by: 0) | run_atac_doublet_detection
+    dd = atac_bam.combine(prep_doublet_detection(pass_qc_metrics.atac_nuclei.combine(Channel.fromPath(params.atac_barcodes))), by: 0).map({it -> it + [get_blacklists(get_genome(it[0])).collect({x -> file(x)})]}) | run_atac_doublet_detection
     dd.map({it -> it + [file(params.libraries[it[0]].atac_qc), file(params.rna_barcodes), file(params.atac_barcodes)]}) | plot_doublet_probabilities
 
     demuxlet_out_atac.combine(demuxlet_out_rna, by: 0).combine(Channel.fromPath(params.rna_barcodes)).combine(Channel.fromPath(params.atac_barcodes)) | plot_demuxlet
