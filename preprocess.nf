@@ -152,13 +152,13 @@ process plot_rna_qc {
     memory '15 GB'
     publishDir "${params.results}/rna/qc"
     tag "${library}-${genome}"
-    container 'library://porchard/default/general:20220107'
+    container 'library://porchard/default/dropkick:20220225'
 
     input:
     tuple val(library), val(genome), path(metrics), path(dk)
 
     output:
-    tuple val(library), val(genome), path("${library}-${genome}.metrics.png")
+    tuple val(library), val(genome), path("${library}-${genome}.metrics.png"), path("${library}-${genome}.suggested-thresholds.tsv")
 
     """
     plot-rna-qc-metrics.py --prefix ${library}-${genome}. $metrics $dk

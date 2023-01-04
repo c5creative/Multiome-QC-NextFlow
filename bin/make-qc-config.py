@@ -14,6 +14,7 @@ ATAC_QC_FILES = glob.glob(os.path.join(ATAC_RESULTS, 'ataqv', 'single-nucleus', 
 ATAC_BAMS = glob.glob(os.path.join(ATAC_RESULTS, 'prune', '*.bam'))
 RNA_BAMS = glob.glob(os.path.join(RNA_RESULTS, 'prune', '*.bam'))
 RNA_DROPKICK = glob.glob(os.path.join(RNA_RESULTS, 'dropkick', '*.dropkick-score.tsv'))
+RNA_SUGGESTED_UMI = glob.glob(os.path.join(RNA_RESULTS, 'qc', '*.suggested-thresholds.tsv'))
 ATAC_SUGGESTED_HQAA = glob.glob(os.path.join(ATAC_RESULTS, 'ataqv', 'single-nucleus', '*.suggested-thresholds.tsv'))
 
 # infer library names
@@ -22,6 +23,7 @@ atac_qc = {os.path.basename(f).replace('.txt', ''): f for f in ATAC_QC_FILES}
 atac_bam = {os.path.basename(f).replace('.pruned.bam', ''): f for f in ATAC_BAMS}
 rna_bam = {os.path.basename(f).replace('.before-dedup.bam', ''): f for f in RNA_BAMS}
 rna_dropkick = {os.path.basename(f).replace('.dropkick-score.tsv', ''): f for f in RNA_DROPKICK}
+rna_suggested_umi = {os.path.basename(f).replace('.suggested-thresholds.tsv', ''): f for f in RNA_SUGGESTED_UMI}
 atac_suggested_hqaa = {os.path.basename(f).replace('.suggested-thresholds.tsv', ''): f for f in ATAC_SUGGESTED_HQAA}
 
 # ensure that all keys are same
@@ -29,9 +31,11 @@ assert(set(rna_qc.keys()) == set(atac_qc.keys()))
 assert(set(rna_qc.keys()) == set(atac_bam.keys()))
 assert(set(rna_qc.keys()) == set(rna_bam.keys()))
 assert(set(rna_qc.keys()) == set(rna_dropkick.keys()))
+assert(set(rna_qc.keys()) == set(rna_suggested_umi.keys()))
 assert(set(rna_qc.keys()) == set(atac_suggested_hqaa.keys()))
 
-# read suggested HQAA values
+# read suggested UMI and HQAA thresholds
+rna_suggested_umis = {l: pd.read_csv(f, sep='\t').set_index('metric').at['min_UMI', 'threshold'] for l, f in rna_suggested_umi.items()}
 atac_suggested_hqaa = {l: pd.read_csv(f, sep='\t').set_index('metric').at['min_HQAA', 'threshold'] for l, f in atac_suggested_hqaa.items()}
 
 libraries = {
@@ -45,10 +49,10 @@ libraries = {
         'vcf': 'None',
         'thresholds': {
             'HQAA_MIN': str(atac_suggested_hqaa[library]),
-            'DROPKICK': '0.9',
+            'DROPKICK': '0.1',
             'TSS_ENRICH_MIN': '2',
             'MAX_FRAC_FROM_AUTOSOME_MAX': '0.15',
-            'RNA_UMI_MIN': '500',
+            'RNA_UMI_MIN': str(rna_suggested_umis[library]),
             'FRAC_MITO_MAX': '0.2'
         }
     } 
