@@ -66,7 +66,7 @@ To run the main QC pipeline, you'll need to provide a config.json file like this
                 "FRAC_MITO_MAX": "1.0", # maximum RNA mitochondrial contamination
                 "HQAA_MIN": "6182", # minimum pass-filter ATAC read threshold
                 "MAX_FRAC_FROM_AUTOSOME_MAX": "0.15", # threshold denoting the maximum fraction of filtered ATAC reads allowed to come from a single autosome; used to filter out droplets that capture e.g. a single chromosome
-                "RNA_UMI_MIN": "0", # min RNA UMIs
+                "RNA_UMI_MIN": "312", # min RNA UMIs
                 "TSS_ENRICH_MIN": "2" # min ATAC TSS enrichment
             },
             "vcf": "None" # path to VCF file, if demultiplexing is to be performed
@@ -78,7 +78,7 @@ To run the main QC pipeline, you'll need to provide a config.json file like this
 If you've run preprocessing.nf or the accompanying ATAC/RNA pipelines, you can create this config template automatically and then manually edit any QC thresholds you wish to change:
 * If you ran preprocessing.nf, you can run `python /path/to/Multiome-QC-NextFlow/bin/make-qc-config.py /path/to/preprocess/results/rna /path/to/preprocess/results/atac > config.json` to create the json
 * If you ran the ATAC/RNA pipelines, you can run `python /path/to/Multiome-QC-NextFlow/bin/make-qc-config.py /path/to/rna/results /path/to/atac/results > config.json`
-* Note that the `HQAA_MIN` threshold parameter will already be set to a value inferred using multi-otsu thresholding on the ATAC HQAA distribution
+* Note that the `HQAA_MIN` threshold parameter will already be set to a value inferred using multi-otsu thresholding on the ATAC HQAA distribution, and the `RNA_UMI_MIN` threshold parameter will similarly be set to a value inferred from the RNA UMI distribution.
 
 You'll also need to update the file paths in the `nextflow.config` file in this directory.
 
@@ -87,3 +87,9 @@ Then run the pipeline:
 ```bin
 nextflow run -resume -params-file config.json --results /path/to/results /path/to/Multiome-QC-NextFlow/qc.nf
 ```
+
+## Output
+* `barcodes-passing-qc-thresholds/*`: List of RNA and ATAC barcodes passing all QC thresholds (before doublet detection), and corresponding QC plots
+* `atac-doublet-detection`: Doublet detection results based on AMULET, including lists of singlet RNA/ATAC barcodes (to be used for downstream analysis)
+* `demuxlet/out`: Raw demuxlet output files for each library and modality
+* `demuxlet/processed`: List of demuxlet --> doublet / singlet (+ individual) assignments, and plots of demuxlet assignments and ATAC / RNA concordance
