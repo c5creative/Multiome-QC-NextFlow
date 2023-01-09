@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import pysam
 import gzip
-import json
 import argparse
 import logging
-import numpy as np
 from scipy.io import mmread
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s: %(message)s')
