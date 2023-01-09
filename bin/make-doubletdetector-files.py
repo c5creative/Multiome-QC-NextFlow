@@ -3,7 +3,6 @@
 
 import sys
 import pandas as pd
-import snutils.nucleus as nucleus
 
 AUTOSOMES = {
     'hg19': [f'chr{i}' for i in range(1, 23)],

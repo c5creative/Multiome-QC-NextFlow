@@ -8,7 +8,6 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-import snutils.nucleus as nucleus
 
 DOUBLET_PROBABILITIES, ATAQV_METRICS, RNA_BARCODES, ATAC_BARCODES, LIBRARY = sys.argv[1:]
 

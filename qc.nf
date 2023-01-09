@@ -20,7 +20,7 @@ process barcodes_passing_qc_thresholds {
 
     publishDir "${params.results}/barcodes-passing-qc-thresholds"
     tag "${library}"
-    container 'library://porchard/default/snutils:20220113'
+    container "library://porchard/default/general:20220107"
     memory '25 GB'
 
     input:
@@ -185,7 +185,7 @@ process prep_doublet_detection {
 
     publishDir "${params.results}/atac-doublet-detection"
     tag "${library}"
-    container 'library://porchard/default/snutils:20220113'
+    container "library://porchard/default/general:20220107"
 
     input:
     tuple val(library), path(pass_qc_barcodes), path(atac_barcode_list)
@@ -226,7 +226,7 @@ process plot_doublet_probabilities {
 
     publishDir "${params.results}/atac-doublet-detection"
     tag "${library}"
-    container 'library://porchard/default/snutils:20220113'
+    container "library://porchard/default/general:20220107"
 
     input:
     tuple val(library), path(x), path(ataqv), path(rna_barcodes), path(atac_barcodes)

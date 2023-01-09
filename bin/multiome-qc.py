@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
-import re
-import snutils.nucleus as nucleus
 import argparse
 
 parser = argparse.ArgumentParser(add_help=True)
