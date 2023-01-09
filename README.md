@@ -88,6 +88,8 @@ Then run the pipeline:
 nextflow run -resume -params-file config.json --results /path/to/results /path/to/Multiome-QC-NextFlow/qc.nf
 ```
 
+You may wish to run under nohup so that the pipeline continues to run in the background and does not terminate upon logging out of the server (`nohup nextflow run ... &`)
+
 ## Output
 * `barcodes-passing-qc-thresholds/*`: List of RNA and ATAC barcodes passing all QC thresholds (before doublet detection), and corresponding QC plots
 * `atac-doublet-detection`: Doublet detection results based on AMULET, including lists of singlet RNA/ATAC barcodes (to be used for downstream analysis)
