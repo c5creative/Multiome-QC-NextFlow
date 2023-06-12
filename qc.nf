@@ -167,6 +167,7 @@ process concat_demuxlet {
 process plot_demuxlet {
 
     publishDir "${params.results}/demuxlet/processed", mode: 'rellink'
+    container "library://porchard/default/general:20220107"
 
     input:
     tuple val(library), path(demuxlet_best_atac), path(demuxlet_best_rna), path(rna_barcodes), path(atac_barcodes)
