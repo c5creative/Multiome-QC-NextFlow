@@ -15,7 +15,8 @@ AUTOSOMAL_REFERENCES = ['hg19': (1..22).collect({it -> 'chr' + it}),
     'rn6': (1..20).collect({it -> 'chr' + it}),
     'rn7': (1..20).collect({it -> 'chr' + it}),
     'mm9': (1..19).collect({it -> 'chr' + it}),
-    'mm10': (1..19).collect({it -> 'chr' + it})
+    'mm10': (1..19).collect({it -> 'chr' + it}),
+    'mm39': (1..19).collect({it -> 'chr' + it})
 ]
 
 ORGANISMS = ['hg19': 'human', 
@@ -25,7 +26,8 @@ ORGANISMS = ['hg19': 'human',
     'rn6': 'rat',
     'rn7': 'rat',
     'mm9': 'mouse',
-    'mm10': 'mouse'
+    'mm10': 'mouse',
+    'mm39': 'mouse'
 ]
 
 MACS2_GENOME_SIZE = [
@@ -35,6 +37,7 @@ MACS2_GENOME_SIZE = [
     'rn7': 'mm',
     'mm9': 'mm',
     'mm10': 'mm',
+    'mm39': 'mm',
     'hg19': 'hs',
     'hg38': 'hs'
 ]
